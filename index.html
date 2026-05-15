@@ -1522,20 +1522,48 @@ function renderAdminList(){
   });
 }
 
+
+// ============================================================
+//  IMAGE COMPRESSION
+// ============================================================
+function compressImage(file, maxWidth, callback) {
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function(e) {
+    const img = new Image();
+    img.src = e.target.result;
+    img.onload = function() {
+      const canvas = document.createElement("canvas");
+      let width = img.width;
+      let height = img.height;
+      if (width > maxWidth) {
+        height = Math.round(height * (maxWidth / width));
+        width = maxWidth;
+      }
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(img, 0, 0, width, height);
+      callback(canvas.toDataURL("image/jpeg", 0.75));
+    };
+  };
+}
+
 // ============================================================
 //  ADMIN — ADD/EDIT PRODUCT
 // ============================================================
+
 function handleImg(input){
   const file=input.files[0];if(!file)return;
-  const rd=new FileReader();
-  rd.onload=function(e){
-    pendingImgBase64=e.target.result;
-    document.getElementById("imgPreviewEl").src=pendingImgBase64;
+  document.getElementById("imgPlaceholder").textContent = "⏳ Comprimiendo...";
+  compressImage(file, 800, function(compressedBase64) {
+    pendingImgBase64 = compressedBase64;
+    document.getElementById("imgPreviewEl").src = pendingImgBase64;
     document.getElementById("imgPreviewEl").style.display="block";
     document.getElementById("imgPlaceholder").style.display="none";
+    document.getElementById("imgPlaceholder").textContent = "📷 Haz clic para elegir foto";
     document.getElementById("afImgUrl").value="";
-  };
-  rd.readAsDataURL(file);
+  });
 }
 
 async function saveProduct(){
@@ -1822,27 +1850,27 @@ async function saveLogo(){
 
 function handleBannerImg(input){
   const file=input.files[0];if(!file)return;
-  const rd=new FileReader();
-  rd.onload=function(e){
-    pendingBannerB64=e.target.result;
-    document.getElementById("bannerPreviewImg").src=pendingBannerB64;
+  document.getElementById("bannerPreviewPlaceholder").textContent = "⏳ Comprimiendo...";
+  compressImage(file, 1200, function(compressedBase64) {
+    pendingBannerB64 = compressedBase64;
+    document.getElementById("bannerPreviewImg").src = pendingBannerB64;
     document.getElementById("bannerPreviewImg").style.display="block";
     document.getElementById("bannerPreviewPlaceholder").style.display="none";
+    document.getElementById("bannerPreviewPlaceholder").textContent = "📷 Clic para elegir foto de banner";
     document.getElementById("bannerUrl").value="";
-  };
-  rd.readAsDataURL(file);
+  });
 }
 
 function handleLogoImg(input){
   const file=input.files[0];if(!file)return;
-  const rd=new FileReader();
-  rd.onload=function(e){
-    pendingLogoB64=e.target.result;
-    document.getElementById("logoUploadPreview").src=pendingLogoB64;
+  document.getElementById("logoUploadPlaceholder").textContent = "⏳ Comprimiendo...";
+  compressImage(file, 400, function(compressedBase64) {
+    pendingLogoB64 = compressedBase64;
+    document.getElementById("logoUploadPreview").src = pendingLogoB64;
     document.getElementById("logoUploadPreview").style.display="block";
     document.getElementById("logoUploadPlaceholder").style.display="none";
-  };
-  rd.readAsDataURL(file);
+    document.getElementById("logoUploadPlaceholder").textContent = "📷 Subir imagen de logo";
+  });
 }
 
 // ============================================================
