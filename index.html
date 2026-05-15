@@ -1119,9 +1119,16 @@ let ADMIN_PASS = DEFAULT_PASS;
 let isDataLoaded = false;
 
 // --- Firebase Listeners ---
-db.ref('/').on('value', (snapshot) => {
+function parseProductsFromFirebase(raw) {
+  if (!raw) return JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+  if (Array.isArray(raw)) return raw; // legacy array format
+  // object keyed by id
+  return Object.values(raw);
+}
+
+db.ref('/').on('value', function(snapshot) {
   const data = snapshot.val() || {};
-  PRODUCTS = data.products || JSON.parse(JSON.stringify(DEFAULT_PRODUCTS));
+  PRODUCTS = parseProductsFromFirebase(data.products);
   ZONES = data.zones || JSON.parse(JSON.stringify(DEFAULT_ZONES));
   APPEAR = Object.assign({}, DEFAULT_APPEAR, data.appear || {});
   INFO = Object.assign({}, DEFAULT_INFO, data.info || {});
@@ -1145,7 +1152,13 @@ db.ref('/').on('value', (snapshot) => {
   isDataLoaded = true;
 });
 
-function saveData() { db.ref('products').set(PRODUCTS); db.ref('zones').set(ZONES); }
+function saveData() {
+  // Store products as {id: product} object for independent nodes
+  const prodObj = {};
+  PRODUCTS.forEach(function(p) { prodObj[p.id] = p; });
+  db.ref('products').set(prodObj);
+  db.ref('zones').set(ZONES);
+}
 function saveAppearLS() { db.ref('appear').set(APPEAR); }
 function saveInfoLS() { db.ref('info').set(INFO); }
 function savePass(p) { db.ref('pass').set(p); }
@@ -1526,7 +1539,7 @@ function renderAdminList(){
 // ============================================================
 //  IMAGE COMPRESSION
 // ============================================================
-function compressImage(file, maxWidth, callback) {
+function compressImage(file, maxSizePx, callback) {
   if (!file) { callback(""); return; }
   const reader = new FileReader();
   reader.onload = function(e) {
@@ -1535,34 +1548,36 @@ function compressImage(file, maxWidth, callback) {
     img.onload = function() {
       try {
         const canvas = document.createElement("canvas");
-        let width = img.width;
-        let height = img.height;
-        if (width > maxWidth) {
-          height = Math.round(height * (maxWidth / width));
-          width = maxWidth;
+        let w = img.width, h = img.height;
+        // Scale so longest side <= maxSizePx
+        const maxPx = Math.min(maxSizePx, 700);
+        if (w > maxPx || h > maxPx) {
+          if (w > h) { h = Math.round(h * maxPx / w); w = maxPx; }
+          else { w = Math.round(w * maxPx / h); h = maxPx; }
         }
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = w; canvas.height = h;
         const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, width, height);
-        const compressed = canvas.toDataURL("image/jpeg", 0.75);
-        if (compressed === "data:," || compressed.length < 50) {
-           callback(originalBase64); // Fallback
-        } else {
-           callback(compressed);
+        ctx.fillStyle = "#fff";
+        ctx.fillRect(0, 0, w, h);
+        ctx.drawImage(img, 0, 0, w, h);
+        // Try quality 0.65; if still > 80KB, try 0.5
+        let result = canvas.toDataURL("image/jpeg", 0.65);
+        if (result.length > 110000) {
+          result = canvas.toDataURL("image/jpeg", 0.45);
         }
-      } catch (err) {
+        if (!result || result === "data:," || result.length < 100) {
+          callback(originalBase64);
+        } else {
+          callback(result);
+        }
+      } catch(err) {
         callback(originalBase64);
       }
     };
-    img.onerror = function() {
-      callback(originalBase64);
-    };
+    img.onerror = function() { callback(originalBase64); };
     img.src = originalBase64;
   };
-  reader.onerror = function() {
-    callback("");
-  };
+  reader.onerror = function() { callback(""); };
   reader.readAsDataURL(file);
 }
 
