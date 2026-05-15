@@ -960,7 +960,7 @@ img{display:block;max-width:100%;object-fit:cover}
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <!-- Firebase Services -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
+
 
 <script>
 const firebaseConfig = {
@@ -975,7 +975,7 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.database();
-const storage = firebase.storage();
+
 
 // ============================================================
 //  CONSTANTS & DEFAULT CONFIG
@@ -1527,7 +1527,6 @@ function renderAdminList(){
 // ============================================================
 function handleImg(input){
   const file=input.files[0];if(!file)return;
-  pendingImgFile = file;
   const rd=new FileReader();
   rd.onload=function(e){
     pendingImgBase64=e.target.result;
@@ -1558,11 +1557,7 @@ async function saveProduct(){
   btn.textContent = "Subiendo...";
   
   try {
-      if (pendingImgFile) {
-          const ref = storage.ref('productos/' + Date.now() + '_' + pendingImgFile.name);
-          await ref.put(pendingImgFile);
-          finalImg = await ref.getDownloadURL();
-      } else if (pendingImgBase64) {
+      if (pendingImgBase64) {
           finalImg = pendingImgBase64;
       } else if (editingId) {
           const p = PRODUCTS.find(x => x.id === editingId);
@@ -1798,18 +1793,7 @@ async function saveAppearance(){
   APPEAR.bannerTitle=document.getElementById("bannerTitle").value||DEFAULT_APPEAR.bannerTitle;
   APPEAR.bannerDesc=document.getElementById("bannerDesc").value||DEFAULT_APPEAR.bannerDesc;
   
-  if (pendingBannerFile) {
-      toast("Subiendo banner...");
-      try {
-          const ref = storage.ref('assets/' + Date.now() + '_banner_' + pendingBannerFile.name);
-          await ref.put(pendingBannerFile);
-          APPEAR.bannerB64 = await ref.getDownloadURL();
-          pendingBannerFile = null;
-      } catch(e) {
-          console.error(e);
-          toast("Error subiendo banner");
-      }
-  } else if (pendingBannerB64) {
+  if (pendingBannerB64) {
       APPEAR.bannerB64 = pendingBannerB64;
   }
   
@@ -1826,18 +1810,7 @@ async function saveLogo(){
   APPEAR.logoTagline=document.getElementById("logoTaglineInput").value.trim()||"Hermanas";
   APPEAR.logoName=document.getElementById("logoNameInput").value.trim()||"DecoFlor";
   
-  if (pendingLogoFile) {
-      toast("Subiendo logo...");
-      try {
-          const ref = storage.ref('assets/' + Date.now() + '_logo_' + pendingLogoFile.name);
-          await ref.put(pendingLogoFile);
-          APPEAR.logoUrl = await ref.getDownloadURL();
-          pendingLogoFile = null;
-      } catch(e) {
-          console.error(e);
-          toast("Error subiendo logo");
-      }
-  } else if (pendingLogoB64) {
+  if (pendingLogoB64) {
       APPEAR.logoUrl = pendingLogoB64;
   }
   
@@ -1849,7 +1822,6 @@ async function saveLogo(){
 
 function handleBannerImg(input){
   const file=input.files[0];if(!file)return;
-  pendingBannerFile=file;
   const rd=new FileReader();
   rd.onload=function(e){
     pendingBannerB64=e.target.result;
@@ -1863,7 +1835,6 @@ function handleBannerImg(input){
 
 function handleLogoImg(input){
   const file=input.files[0];if(!file)return;
-  pendingLogoFile=file;
   const rd=new FileReader();
   rd.onload=function(e){
     pendingLogoB64=e.target.result;
