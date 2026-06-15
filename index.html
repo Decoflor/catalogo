@@ -1150,6 +1150,14 @@ db.ref('/').on('value', function(snapshot) {
   }
   
   isDataLoaded = true;
+}, function(error) {
+  console.error("Firebase DB Error:", error);
+  // Fallback para no dejar la página en blanco
+  applyAppearance();
+  applyInfo();
+  buildTabs();
+  renderFeed();
+  setTimeout(function(){ toast("⚠️ Error de conexión con Firebase. ¿Expiraron las reglas?"); }, 1500);
 });
 
 function saveData() {
