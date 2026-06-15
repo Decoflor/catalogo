@@ -512,6 +512,13 @@ img{display:block;max-width:100%;object-fit:cover}
   animation:spin 1s linear infinite;
 }
 @keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
+
+/* Prevent FOUC */
+.hide-until-load {
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
+}
 </style>
 </head>
 <body>
@@ -520,7 +527,7 @@ img{display:block;max-width:100%;object-fit:cover}
 <div id="initialLoader"><div class="loader-spinner"></div></div>
 
 <!-- HEADER -->
-<header class="hdr">
+<header class="hdr hide-until-load" id="mainHdr">
   <div class="logo" id="logoBtn">
     <div class="logo-img-wrap" id="logoImgWrap">
       <img id="logoImgEl" src="" alt="Logo">
@@ -537,7 +544,7 @@ img{display:block;max-width:100%;object-fit:cover}
 </header>
 
 <!-- HERO BANNER -->
-<section class="hero" id="heroBanner">
+<section class="hero hide-until-load" id="heroBanner">
   <div class="hero-bg" id="heroBg"></div>
   <div class="hero-ov"></div>
   <div class="hero-c">
@@ -552,15 +559,15 @@ img{display:block;max-width:100%;object-fit:cover}
 </section>
 
 <!-- CATEGORY BAR -->
-<div class="catbar" id="catalogo">
+<div class="catbar hide-until-load" id="catalogo">
   <div class="catscroll" id="catScroll"></div>
 </div>
 
 <!-- PRODUCT FEED -->
-<main class="feed" id="feed"></main>
+<main class="feed hide-until-load" id="feed"></main>
 
 <!-- FOOTER -->
-<footer class="ftr">
+<footer class="ftr hide-until-load" id="mainFtr">
   <div class="ftr-logo" id="ftrLogo">DecoFlor</div>
   <div class="ftr-sub" id="ftrSub">Hermanas · Tú Floristería</div>
   <div class="ftr-links">
@@ -571,7 +578,7 @@ img{display:block;max-width:100%;object-fit:cover}
 </footer>
 
 <!-- FLOATING WA -->
-<a class="fab" id="fabWa" href="#" target="_blank" aria-label="WhatsApp">
+<a class="fab hide-until-load" id="fabWa" href="#" target="_blank" aria-label="WhatsApp">
   <svg viewBox="0 0 32 32"><path d="M16 2a14 14 0 0 0-12.14 20.9L2 30l7.27-1.83A14 14 0 1 0 16 2zm6.31 19.86c-.34-.17-2.02-1-2.34-1.11-.31-.11-.54-.17-.77.17s-.88 1.11-1.08 1.34-.4.25-.74.08a9.37 9.37 0 0 1-2.74-1.69 10.28 10.28 0 0 1-1.9-2.36c-.2-.34 0-.52.15-.69s.34-.4.51-.6.23-.4.34-.57a.63.63 0 0 0 0-.6c-.08-.17-.77-1.85-1.06-2.53s-.56-.57-.77-.58h-.65a1.26 1.26 0 0 0-.91.42 3.83 3.83 0 0 0-1.19 2.84 6.64 6.64 0 0 0 1.39 3.52 15.26 15.26 0 0 0 5.84 5.15 16.82 16.82 0 0 0 1.95.72 4.69 4.69 0 0 0 2.15.14 3.52 3.52 0 0 0 2.31-1.62 2.86 2.86 0 0 0 .2-1.62c-.08-.14-.31-.22-.65-.39z"/></svg>
 </a>
 
@@ -1171,6 +1178,11 @@ db.ref('/').on('value', function(snapshot) {
     loader.style.opacity = "0";
     setTimeout(function(){ loader.style.display = "none"; }, 400);
   }
+  
+  // Reveal hidden elements
+  document.querySelectorAll(".hide-until-load").forEach(function(el){
+    el.classList.remove("hide-until-load");
+  });
 }, function(error) {
   console.error("Firebase DB Error:", error);
   // Fallback para no dejar la página en blanco
@@ -1183,6 +1195,12 @@ db.ref('/').on('value', function(snapshot) {
     loader.style.opacity = "0";
     setTimeout(function(){ loader.style.display = "none"; }, 400);
   }
+  
+  // Reveal hidden elements
+  document.querySelectorAll(".hide-until-load").forEach(function(el){
+    el.classList.remove("hide-until-load");
+  });
+  
   setTimeout(function(){ toast("⚠️ Error de conexión con Firebase. ¿Expiraron las reglas?"); }, 1500);
 });
 
