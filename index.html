@@ -499,9 +499,25 @@ img{display:block;max-width:100%;object-fit:cover}
   font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;
   background:var(--primary);color:#fff;margin-top:4px;
 }
+
+/* Initial Loader */
+#initialLoader{
+  position:fixed;inset:0;background:var(--bg, #F9F4EF);z-index:999999;
+  display:flex;align-items:center;justify-content:center;
+  transition:opacity 0.4s ease;
+}
+.loader-spinner{
+  width:44px;height:44px;border:4px solid rgba(0,0,0,0.1);
+  border-top:4px solid var(--primary, #C1415A);border-radius:50%;
+  animation:spin 1s linear infinite;
+}
+@keyframes spin{0%{transform:rotate(0deg)}100%{transform:rotate(360deg)}}
 </style>
 </head>
 <body>
+
+<!-- INITIAL LOADER -->
+<div id="initialLoader"><div class="loader-spinner"></div></div>
 
 <!-- HEADER -->
 <header class="hdr">
@@ -1150,6 +1166,11 @@ db.ref('/').on('value', function(snapshot) {
   }
   
   isDataLoaded = true;
+  const loader = document.getElementById("initialLoader");
+  if(loader) {
+    loader.style.opacity = "0";
+    setTimeout(function(){ loader.style.display = "none"; }, 400);
+  }
 }, function(error) {
   console.error("Firebase DB Error:", error);
   // Fallback para no dejar la página en blanco
@@ -1157,6 +1178,11 @@ db.ref('/').on('value', function(snapshot) {
   applyInfo();
   buildTabs();
   renderFeed();
+  const loader = document.getElementById("initialLoader");
+  if(loader) {
+    loader.style.opacity = "0";
+    setTimeout(function(){ loader.style.display = "none"; }, 400);
+  }
   setTimeout(function(){ toast("⚠️ Error de conexión con Firebase. ¿Expiraron las reglas?"); }, 1500);
 });
 
