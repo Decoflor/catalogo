@@ -998,6 +998,7 @@ if (!firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 const db = firebase.database();
+const DB_ROOT = 'flores';
 
 
 // ============================================================
@@ -1149,7 +1150,7 @@ function parseProductsFromFirebase(raw) {
   return Object.values(raw);
 }
 
-db.ref('/').on('value', function(snapshot) {
+db.ref(DB_ROOT).on('value', function(snapshot) {
   const data = snapshot.val() || {};
   PRODUCTS = parseProductsFromFirebase(data.products);
   ZONES = data.zones || JSON.parse(JSON.stringify(DEFAULT_ZONES));
@@ -1208,12 +1209,12 @@ function saveData() {
   // Store products as {id: product} object for independent nodes
   const prodObj = {};
   PRODUCTS.forEach(function(p) { prodObj[p.id] = p; });
-  db.ref('products').set(prodObj);
-  db.ref('zones').set(ZONES);
+  db.ref(DB_ROOT + '/products').set(prodObj);
+  db.ref(DB_ROOT + '/zones').set(ZONES);
 }
-function saveAppearLS() { db.ref('appear').set(APPEAR); }
-function saveInfoLS() { db.ref('info').set(INFO); }
-function savePass(p) { db.ref('pass').set(p); }
+function saveAppearLS() { db.ref(DB_ROOT + '/appear').set(APPEAR); }
+function saveInfoLS() { db.ref(DB_ROOT + '/info').set(INFO); }
+function savePass(p) { db.ref(DB_ROOT + '/pass').set(p); }
 
 let activeCat="Todos";
 let selectedProd=null;
