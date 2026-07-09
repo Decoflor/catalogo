@@ -1350,7 +1350,7 @@ function setAllWaLinks(){
 // ============================================================
 //  FORMAT
 // ============================================================
-function fmt(n){return"RD$ "+Number(n).toLocaleString("es-DO");}
+function fmt(n){if(typeof n === "string" && isNaN(Number(n))) return n; return"RD$ "+Number(n).toLocaleString("es-DO");}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
 
 // ============================================================
@@ -1441,7 +1441,7 @@ function buildZoneSelect(){
 // ============================================================
 //  ORDER MODAL
 // ============================================================
-function openOrder(id){ window.location.href = id + '.html'; return; " 
+function openOrder(id){ window.location.href = id + '.html'; return; 
   selectedProd=PRODUCTS.find(function(p){return p.id===id;});
   if(!selectedProd)return;
   document.getElementById("sheetName").textContent=selectedProd.name;
